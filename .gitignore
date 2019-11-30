@@ -1,0 +1,58 @@
+# Repository management
+.svn
+
+# git-deploy status file:
+/.deploy
+
+# Editors
+*.kate-swp
+*~
+\#*#
+.#*
+.*.swp
+.project
+cscope.files
+cscope.out
+*.orig
+## NetBeans
+nbproject*
+project.index
+## Sublime
+sublime-*
+sftp-config.json
+
+# Building & testing
+npm-debug.log
+node_modules/
+/tests/phpunit/phpunit.phar
+/tests/selenium/log
+/date_update.log
+
+# Composer
+/vendor
+/composer.lock
+/composer.local.json
+/composer.phar
+
+# Operating systems
+## Mac OS X
+.DS_Store
+## Windows
+Thumbs.db
+
+# Misc
+.buildpath
+.classpath
+.idea
+*.iml
+.metadata*
+.settings
+#/favicon.ico
+/static*
+/tags
+/.htaccess
+/.htpasswd
+/tests/phan/issues
+*.rej
+
+/.vscode
