@@ -56,3 +56,7 @@ Thumbs.db
 *.rej
 
 /.vscode
+
+/Config.php
+/cookie.jar
+/.phpunit.result.cache

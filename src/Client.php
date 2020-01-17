@@ -13,7 +13,7 @@ use Exception;
  */
 class Client
 {
-    const MODE_BOT     = 'bot';
+    const MODE_BOT     = 'mwbot';
     const MODE_AD      = 'ad_user';
     const MODE_DEFAULT = self::MODE_AD;
 
@@ -51,22 +51,71 @@ class Client
      */
     public function __construct($endpoint, $login, $password, $cookieFile, $mode = self::MODE_DEFAULT)
     {
+        $endpoint = $this->checkEndpoint($endpoint);
+
         $this->login = $login;
         $this->password = $password;
 
         $this->options[CURLOPT_URL] = $endpoint;
         $this->options[CURLOPT_COOKIEFILE] = $this->options[CURLOPT_COOKIEJAR] = $cookieFile;
 
-        switch ($mode) {
-            case self::MODE_BOT:
-                $this->options[CURLOPT_HTTPHEADER] = ['User-Agent: mwbot'];
+        if(false === in_array($mode, [self::MODE_BOT, self::MODE_AD]) ){
+            throw new Exception('Unsuported mode');
+        }
+
+        $this->options[CURLOPT_HTTPHEADER] = ["User-Agent: $mode"];
+    }
+
+    /**
+     * Check MW API endpoint correct and accessibility
+     *
+     * @param string $endpoint
+     * @return string
+     * @throws Exception
+     */
+    protected function checkEndpoint(string $endpoint):string {
+        $endpointComponents = parse_url($endpoint);
+
+        $scheme = $endpointComponents['scheme'] ?? null;
+        $host = $endpointComponents['host'] ?? null;
+        $path = $endpointComponents['path'] ?? '';
+
+        if( false === strpos($path, 'api.php')  ){
+            throw new Exception("Incorrect endpoint: MW API endpoint must contains '/api.php' in path");
+        }
+
+        if( null === $host ){
+            throw new Exception("Incorrect endpoint: host not presented");
+        }
+
+        if( null === $scheme ){
+            $scheme = 'https';
+        }
+
+        switch ($scheme) {
+            case 'http':
+                $port = 80;
+                $transport = 'udp';
                 break;
-            case self::MODE_AD:
-                $this->options[CURLOPT_HTTPHEADER] = ['User-Agent: mwaduser'];
+            case 'https':
+                $port = 443;
+                $transport = 'ssl';
                 break;
             default:
-                throw new Exception('Unsuported mode');
+                throw new Exception("Incorrect endpoint: scheme not presented");
         }
+
+        if (@gethostbyname($host) === $host) {
+            throw new Exception("MW API host is unresolved: $host");
+        }
+
+        $sockCheck = @fsockopen("$transport://$host", $port, $errno, $error, 10);
+        if (false === $sockCheck) {
+            throw new Exception("MW API host ($scheme://$host:$port) is unavailable: [$errno] $error");
+        }
+        fclose($sockCheck);
+
+        return "$scheme://$host$path";
     }
 
     /**
@@ -93,7 +142,7 @@ class Client
         $this->checkAuthentication($postParams);
 
         $curlOptions = $this->getOptions([
-            CURLOPT_POSTFIELDS => $postParams,
+            CURLOPT_POSTFIELDS => http_build_query($postParams),
         ]);
 
         curl_setopt_array(
@@ -109,7 +158,7 @@ class Client
 
         $data = json_decode($curlExec);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception(json_last_error_msg());
+            throw new Exception("Error parsing JSON response: " . json_last_error_msg() . " - $curlExec");
         }
 
         return $data;
