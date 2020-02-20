@@ -35,7 +35,7 @@ class Client
         CURLOPT_SSL_VERIFYHOST => 2,
         CURLOPT_POST           => true,
         CURLOPT_HTTPHEADER     => [
-            'User-Agent: mwbot',
+            'User-Agent: ad_user',
         ],
     ];
 
@@ -59,11 +59,11 @@ class Client
         $this->options[CURLOPT_URL] = $endpoint;
         $this->options[CURLOPT_COOKIEFILE] = $this->options[CURLOPT_COOKIEJAR] = $cookieFile;
 
-        if(false === in_array($mode, [self::MODE_BOT, self::MODE_AD]) ){
-            throw new Exception('Unsuported mode');
-        }
-
-        $this->options[CURLOPT_HTTPHEADER] = ["User-Agent: $mode"];
+//        if(false === in_array($mode, [self::MODE_BOT, self::MODE_AD]) ){
+//            throw new Exception('Unsuported mode');
+//        }
+//
+//        $this->options[CURLOPT_HTTPHEADER] = ["User-Agent: $mode"];
     }
 
     /**
@@ -109,11 +109,11 @@ class Client
             throw new Exception("MW API host is unresolved: $host");
         }
 
-        $sockCheck = @fsockopen("$transport://$host", $port, $errno, $error, 10);
-        if (false === $sockCheck) {
-            throw new Exception("MW API host ($scheme://$host:$port) is unavailable: [$errno] $error");
-        }
-        fclose($sockCheck);
+//        $sockCheck = @fsockopen("$transport://$host", $port, $errno, $error, 10);
+//        if (false === $sockCheck) {
+//            throw new Exception("MW API host ($scheme://$host:$port) is unavailable: [$errno] $error");
+//        }
+//        fclose($sockCheck);
 
         return "$scheme://$host$path";
     }

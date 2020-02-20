@@ -22,14 +22,27 @@ class ActionAnnounce
      * @return mixed
      * @throws Exception
      */
-    public function getUpcoming($limit = 5, $offset = 0)
+    public function getUpcoming($limit = 5, $offset = 0, $tsFrom = null, $tsTo = null)
     {
-        return $this->client->request([
+        echo http_build_query([
             'action'     => 'announce',
-            'type'       => 'upcoming',
+            'type'       => '*',
             'method'     => 'get',
             'key_format' => 'number',
-            'from'       => (new DateTime())->getTimestamp(),
+            'from'       => $tsFrom,
+            'to'         => $tsTo,
+            'limit'      => $limit,
+            'offset'     => $offset,
+        ]);
+
+        $ts = $ts ?? (new DateTime())->getTimestamp();
+        return $this->client->request([
+            'action'     => 'announce',
+            'type'       => '*',
+            'method'     => 'get',
+            'key_format' => 'number',
+            'from'       => $tsFrom,
+            'to'         => $tsTo,
             'limit'      => $limit,
             'offset'     => $offset,
         ]);
